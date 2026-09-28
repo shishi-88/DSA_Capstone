@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Friend Recommendations</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">FR</div>
+      <div class="brand-text">
+        <h1>Friend Recommendations</h1>
+        <p>Discover people two steps away</p>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-link active" data-view="home">Home</button>
+      <button class="nav-link" data-view="network">Network Map</button>
+      <button class="nav-link" data-view="friends">Friends</button>
+      <button class="nav-link" data-view="how">How It Works</button>
+    </nav>
+
+    <div class="user-picker" id="user-picker">
+      <label for="user-select">Viewing as</label>
+      <select id="user-select"></select>
+    </div>
+
+    <div class="stats-card" id="stats-card">
+      <h3>Community</h3>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-num" id="stat-users">–</span><span class="stat-label">People</span></div>
+        <div class="stat"><span class="stat-num stat-num-coral" id="stat-edges">–</span><span class="stat-label">Connections</span></div>
+      </div>
+    </div>
+
+    <footer class="sidebar-foot">
+      Every suggestion comes straight from the live network data.
+    </footer>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="search" id="search-wrap">
+        <input id="search" type="text" placeholder="Search people by name or ID…" autocomplete="off" />
+        <div class="search-results hidden" id="search-results"></div>
+      </div>
+      <div class="topbar-user" id="topbar-user"></div>
+    </header>
+
+    <!-- ---------- HOME ---------- -->
+    <section class="view active" id="view-home">
+
+      <!-- Compact selected-user header -->
+      <div class="profile-card" id="profile-card"></div>
+
+      <!-- ===== RECOMMENDED FRIENDS — the main feature ===== -->
+      <div class="card recs-section" id="recs-section">
+        <div class="section-head recs-head">
+          <div>
+            <h2>Recommended Friends</h2>
+            <p class="recs-subtitle" id="recs-subtitle">Pick a person to see their best matches.</p>
+          </div>
+          <div class="recs-controls">
+            <label for="rec-top">Show top</label>
+            <select id="rec-top">
+              <option>3</option><option selected>5</option><option>8</option><option>10</option>
+            </select>
+            <button class="btn btn-coral" id="btn-recommend">Refresh</button>
+          </div>
+        </div>
+        <div class="grid grid-recs" id="recs-grid"></div>
+      </div>
+
+      <!-- Compact direct friends -->
+      <div class="card friends-strip" id="friends-section">
+        <div class="section-head">
+          <h2>Direct Friends</h2>
+          <p id="friends-subtitle"></p>
+        </div>
+        <div class="chip-row" id="friends-grid"></div>
+      </div>
+
+    </section>
+
+    <!-- ---------- NETWORK MAP ---------- -->
+    <section class="view" id="view-network">
+      <div class="graph-layout">
+
+        <div class="card graph-card">
+          <div class="graph-head">
+            <h2>Network Map</h2>
+            <p>Click any person to bring them into focus. The map re-centres on them and their
+               connections, two steps out.</p>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="net-canvas" width="760" height="480"></canvas>
+            <div class="node-tip hidden" id="node-tip"></div>
+          </div>
+          <div class="legend">
+            <span><i class="dot dot-sel"></i> Selected person</span>
+            <span><i class="dot dot-friend"></i> Direct friend</span>
+            <span><i class="dot dot-cand"></i> Recommended match</span>
+            <span><i class="dot dot-other"></i> Outside two steps</span>
+          </div>
+        </div>
+
+        <aside class="card detail-panel" id="detail-panel">
+          <div class="detail-empty" id="detail-empty">Select a node on the map to see details.</div>
+          <div id="detail-body" class="hidden">
+            <div class="detail-head">
+              <div class="avatar avatar-lg" id="dp-avatar">–</div>
+              <div>
+                <div class="detail-name" id="dp-name"></div>
+                <div class="detail-id" id="dp-id"></div>
+              </div>
+            </div>
+
+            <div class="detail-block">
+              <div class="detail-label">Direct Friends <span class="count-pill" id="dp-friend-count">0</span></div>
+              <div class="chip-row" id="dp-friends"></div>
+            </div>
+
+            <div class="detail-block">
+              <div class="detail-label">Recommended <span class="count-pill count-pill-coral" id="dp-rec-count">0</span></div>
+              <ul class="detail-recs" id="dp-recs"></ul>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ---------- FRIENDS VIEW ---------- -->
+    <section class="view" id="view-friends">
+      <div class="card">
+        <div class="section-head">
+          <h2>Direct Friends</h2>
+          <p id="friends-view-subtitle"></p>
+        </div>
+        <div class="grid" id="friends-view-grid"></div>
+      </div>
+    </section>
+
+    <!-- ---------- HOW IT WORKS ---------- -->
+    <section class="view" id="view-how">
+      <div class="card how-section">
+        <h2>How recommendations work</h2>
+        <div class="how-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h3>Look two steps out</h3>
+              <p>We start from the person you are viewing, then look at their direct friends, then at
+                 those friends' own friends. The search stops there — nobody further away is ever considered.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h3>Skip anyone already connected</h3>
+              <p>Your direct friends are never suggested back to you. Only people you do not know yet
+                 make it into the results.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h3>Count mutual friends</h3>
+              <p>For every candidate we count the people you both know. More shared friends means a
+                 stronger connection to your circle.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <h3>Show the strongest matches</h3>
+              <p>Results are ordered by mutual-friend count, highest first; equal counts are ordered
+                 by lower ID. Use the "Show top" control to see fewer or more.</p>
+            </div>
+          </div>
+        </div>
+        <div class="how-stats" id="how-stats"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+# data/sample_network.txt -- Friend Recommendation Engine sample dataset
+#
+# Format (one instruction per line, '#' starts a comment):
+#     u <id>        register user <id>
+#     e <a> <b>     create friendship between users <a> and <b>
+#
+# 20 users shaped for the rubric's test cases:
+#   - two dense clusters (college group 0-4, work group 5-9)
+#   - bridging users 10 and 11 that connect the clusters (high recommendations)
+#   - a family cluster 12-14 attached through bridge 11
+#   - isolated user 19 (zero friends) and leaf users 15-18
+#   - a clique {16,17,18}: querying 17 shows direct friends excluded from
+#     candidates while 16's other neighbours surface as recommendations
+
+# ---- users ----------------------------------------------------------------
+u 0
+u 1
+u 2
+u 3
+u 4
+u 5
+u 6
+u 7
+u 8
+u 9
+u 10
+u 11
+u 12
+u 13
+u 14
+u 15
+u 16
+u 17
+u 18
+u 19
+
+# ---- cluster A: college friends (dense, 0-4) ------------------------------
+e 0 1
+e 0 2
+e 0 3
+e 1 2
+e 1 4
+e 2 3
+e 3 4
+
+# ---- cluster B: coworkers (dense, 5-9) ------------------------------------
+e 5 6
+e 5 7
+e 6 7
+e 6 8
+e 7 9
+e 8 9
+
+# ---- bridges: the connectors between clusters ------------------------------
+e 4 10
+e 10 5
+e 10 11
+e 9 11
+
+# ---- family cluster 12-14, reached through bridge 11 -----------------------
+e 11 12
+e 12 13
+e 12 14
+e 13 14
+
+# ---- leaf users ------------------------------------------------------------
+e 0 15
+e 6 16
+
+# ---- clique: 16,17,18 are all friends with each other ----------------------
+e 16 17
+e 16 18
+e 17 18
+
+# ---- user 19: intentionally no friendships (zero-friend edge case) ----------
