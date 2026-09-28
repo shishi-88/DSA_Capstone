@@ -31,17 +31,9 @@
       <select id="user-select"></select>
     </div>
 
-    <div class="stats-card" id="stats-card">
-      <h3>Community</h3>
-      <div class="stat-row">
-        <div class="stat"><span class="stat-num" id="stat-users">–</span><span class="stat-label">People</span></div>
-        <div class="stat"><span class="stat-num stat-num-coral" id="stat-edges">–</span><span class="stat-label">Connections</span></div>
-      </div>
-    </div>
-
-    <footer class="sidebar-foot">
-      Every suggestion comes straight from the live network data.
-    </footer>
+    <p class="mini-stats">
+      <span id="stat-users">–</span> people · <span id="stat-edges">–</span> connections
+    </p>
   </aside>
 
   <!-- ===================== MAIN ===================== -->
@@ -97,8 +89,8 @@
         <div class="card graph-card">
           <div class="graph-head">
             <h2>Network Map</h2>
-            <p>Click any person to bring them into focus. The map re-centres on them and their
-               connections, two steps out.</p>
+            <p>The selected person's own circle: direct friends in the inner ring, their recommended
+               matches in the outer ring. Click anyone to bring them into focus.</p>
           </div>
           <div class="canvas-wrap">
             <canvas id="net-canvas" width="760" height="480"></canvas>
@@ -108,7 +100,6 @@
             <span><i class="dot dot-sel"></i> Selected person</span>
             <span><i class="dot dot-friend"></i> Direct friend</span>
             <span><i class="dot dot-cand"></i> Recommended match</span>
-            <span><i class="dot dot-other"></i> Outside two steps</span>
           </div>
         </div>
 

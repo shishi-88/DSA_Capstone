@@ -245,12 +245,9 @@ function renderFriends() {
 
 function renderHowStats() {
   const s = state.summary || {};
-  const st = state.recStats;
   $("how-stats").innerHTML = [
     `<span class="badge">${s.users ?? "–"} people in the community</span>`,
-    `<span class="badge">${s.friendships ?? "–"} connections</span>`,
-    st ? `<span class="badge badge-coral">Last search looked at ${st.edges_scanned ?? "–"} connections</span>` : "",
-    st ? `<span class="badge badge-amber">${st.candidates_seen ?? "–"} possible matches considered</span>` : ""
+    `<span class="badge">${s.friendships ?? "–"} connections between them</span>`
   ].join("");
 }
 
@@ -268,7 +265,6 @@ const COLORS = {
   sel:    "#1f6feb",
   friend: "#6fa8f5",
   cand:   "#ff6a3d",
-  other:  "#cdd8e6",
   edge:   "rgba(92,109,134,.22)",
   edgeHot:"rgba(31,111,235,.85)"
 };
@@ -304,20 +300,13 @@ async function drawNetwork() {
   const friendSet = new Set(friends);
   const candIds = state.graphRecs.map(r => r.user_id)
     .filter(id => id !== sel && !friendSet.has(id));
-  const candSet = new Set(candIds);
-  const others = state.users.map(u => u.id)
-    .filter(id => id !== sel && !friendSet.has(id) && !candSet.has(id))
-    .slice(0, 36);                       // keeps the outside layer readable
 
+  /* Local 2-hop view only: the selected person, their direct friends and
+     the people the backend recommends. Nothing else from the network. */
   const pos = new Map();
   pos.set(sel, [cx, cy]);
   for (const [id, p] of ring(cx, cy, R * 0.52, friends, 0)) pos.set(id, p);
   for (const [id, p] of ring(cx, cy, R, candIds, 0.3)) pos.set(id, p);
-  others.forEach((id, i) => {
-    const cols = Math.max(1, Math.min(others.length, Math.floor(W / 48)));
-    pos.set(id, [24 + (i % cols) * ((W - 48) / Math.max(cols - 1, 1)),
-                 H - 16 - Math.floor(i / cols) * 20]);
-  });
 
   /* Real adjacency for the drawn nodes (fetched, then cached). */
   const seen = new Set(), edges = [];
@@ -342,7 +331,6 @@ async function drawNetwork() {
     const [x, y] = pos.get(id);
     nodes.push({ id, x, y, r, kind });
   };
-  others.forEach(id => drawNode(id, COLORS.other, 6, "", "other"));
   candIds.forEach(id => drawNode(id, COLORS.cand, 10, String(id), "cand"));
   friends.forEach(id => drawNode(id, COLORS.friend, 12, String(id), "friend"));
   drawNode(sel, COLORS.sel, 16, userName(sel).split(" ")[0], "sel");
@@ -373,11 +361,11 @@ async function drawNetwork() {
       }
       ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
       ctx.fillStyle = isSel ? COLORS.sel : isHover ? "#ff8a63"
-        : n.kind === "friend" ? COLORS.friend : n.kind === "cand" ? COLORS.cand : COLORS.other;
+        : n.kind === "friend" ? COLORS.friend : COLORS.cand;
       ctx.fill();
       if (isSel) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 2.5; ctx.stroke(); }
 
-      const showLabel = n.kind !== "other" || isHover;
+      const showLabel = true;
       if (showLabel) {
         ctx.fillStyle = isSel ? "#14243b" : "#5c6d86";
         ctx.font = (isSel ? "600 12px " : "11px ") + "'Segoe UI', sans-serif";
@@ -483,6 +471,13 @@ function renderDetailPanel(err) {
 /* ------------------------------------------------------------
    Loading + navigation
    ------------------------------------------------------------ */
+const VIEWS = ["home", "network", "friends", "how"];
+
+function viewFromHash() {
+  const v = decodeURIComponent(location.hash || "").replace(/^#/, "");
+  return VIEWS.includes(v) ? v : "home";
+}
+
 function setView(v) {
   state.view = v;
   document.querySelectorAll(".nav-link").forEach(b =>
@@ -491,6 +486,11 @@ function setView(v) {
     s.classList.toggle("active", s.id === `view-${v}`));
   if (v === "network") drawNetwork();
   if (v === "how")    renderHowStats();
+}
+
+function goToView(v) {
+  if (history.replaceState) history.replaceState(null, "", `#${v}`);
+  setView(v);
 }
 
 async function loadRecommendations(token) {
@@ -605,11 +605,12 @@ function wireActions() {
       $("search").value = "";
       selectUser(parseInt(el.dataset.select, 10), { quiet: true });
     } else if (el.dataset.goto) {
-      setView(el.dataset.goto);
+      goToView(el.dataset.goto);
     }
   });
   document.querySelectorAll(".nav-link").forEach(b =>
-    b.addEventListener("click", () => setView(b.dataset.view)));
+    b.addEventListener("click", () => goToView(b.dataset.view)));
+  window.addEventListener("hashchange", () => setView(viewFromHash()));
 
   $("btn-recommend").addEventListener("click", async () => {
     const token = state.loadToken;
@@ -647,7 +648,7 @@ function wireActions() {
   renderUserSelect();
   wireSearch();
   wireActions();
-  setView("home");
+  goToView(viewFromHash());
 
   if (state.users.length) await selectUser(state.users[0].id, { quiet: true });
 })();
